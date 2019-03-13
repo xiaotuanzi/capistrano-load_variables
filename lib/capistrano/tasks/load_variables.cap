@@ -1,0 +1,18 @@
+require 'yaml'
+
+namespace :load do
+  desc 'load variables from file'
+  task :variables do
+    varfile = File.join(File.dirname(deploy_config_path), 'cap_variables.yml')
+    next unless File.exist?(varfile)
+
+    vars = YAML.load_file(varfile)
+    next if !vars.is_a?(Hash)
+
+    vars[ARGV[0]].each do |name, value|
+      set_if_empty name.to_sym, value
+    end
+  end
+end
+
+after 'load:defaults', 'load:variables'
